@@ -7,3 +7,6 @@ Các file `example_*.json` chỉ minh họa định dạng, không đủ để n
 - **Câu thiếu evidence:** `id`, `split`, `question`, `answerable: false`, `expected_behavior: "search_and_abstain"`, `absence_reason`. Xem `agent_cases_example.json`.
 
 Không đưa `gold` hoặc nhãn đáp án vào model và retrieval tool. Ghi nguồn dữ liệu và quyền sử dụng. Cách chuyển một số định dạng Day 6: [starter/README.md](../starter/README.md).
+
+
+`questions.json` contains 20 answerable Day 06 questions (15 dev, 5 test). `day7_absence_questions.json` adds two unanswerable questions to each split. `starter/day7_pipeline.py prepare` checks the minimum 15/5 answerable and 2/2 unanswerable questions, and verifies that each gold passage matches a chunk on the correct source and page. The new absence questions were checked against the full PDF. Prepared chunks and normalized benchmark data are written under `starter/results/day7/` and are not committed.

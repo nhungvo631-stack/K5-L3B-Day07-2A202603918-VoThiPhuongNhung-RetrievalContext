@@ -56,6 +56,48 @@ python3 starter/agent_metrics.py --cases <cases.json> --traces <traces.json> --r
 
 Thay đường dẫn trong `< >`. Script tổng hợp nhãn bạn đã chấm, không tự đánh giá nội dung. Mẫu số bằng 0 nghĩa là không áp dụng. Lỗi kết nối được báo riêng, không tính vào chất lượng; giữ trace và nhãn để đối chiếu.
 
+## 5. Agent Day 07 và benchmark thật
+
+Code agent và model adapter:
+
+- [`run_agent.py`](./run_agent.py): chạy benchmark và lưu `cases.json`, `traces.json`.
+- [`openai_compatible.py`](./openai_compatible.py): gọi tool-calling API tương thích OpenAI.
+- [`day7_pipeline.py`](./day7_pipeline.py): trích corpus PDF, xây Chroma index và chạy TF-IDF, BM25, dense, hybrid RRF.
+
+Chuẩn bị trong Python 3.11+ environment có PyTorch; model embedding Day 06 phải có trong Hugging Face cache:
+
+```powershell
+python -m pip install -r starter/requirements-day7.txt
+python starter/day7_pipeline.py prepare
+python starter/day7_pipeline.py index
+```
+
+Index mới được tạo ở `starter/results/day7/chroma`; pipeline không sửa index Day 06. Tài liệu Day 06 báo Chroma persistent, embedding `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, 384 chiều. Index cũ tại `starter/results/chroma` không đọc được (`database disk image is malformed`), nên index mới dùng lại PDF, manifest, model và chunk size/overlap 500/50. Đặt `HF_HUB_OFFLINE=1` để không tải model từ mạng.
+
+Chạy các phương pháp trên cùng dev, mỗi cấu hình ghi ra thư mục riêng:
+
+```powershell
+python starter/day7_pipeline.py evaluate --method tfidf --split dev --output starter/results/day7/tfidf-dev
+python starter/day7_pipeline.py evaluate --method bm25 --split dev --output starter/results/day7/bm25-dev
+python starter/day7_pipeline.py evaluate --method dense --split dev --output starter/results/day7/dense-dev
+python starter/day7_pipeline.py evaluate --method hybrid --split dev --rrf-constant 60 --output starter/results/day7/hybrid-r60-dev
+python starter/day7_pipeline.py evaluate --method hybrid --split dev --rrf-constant 20 --top-k 5 --budget 1200 --output starter/results/day7/hybrid-r20-k5-b1200-dev
+python starter/day7_pipeline.py evaluate --method dense --split dev --budget 1600 --output starter/results/day7/dense-b1600-dev
+```
+
+Chọn cấu hình theo dev, ghi lại tiêu chí, rồi mới chạy `--split test` cho baseline và cấu hình được chọn. Đừng dùng test để chỉnh cấu hình.
+
+Để chạy agent thật, thiết lập endpoint, model và key trong environment cục bộ; không ghi key vào file hoặc commit:
+
+```powershell
+$env:OPENAI_BASE_URL = "https://api.openai.com/v1"
+$env:OPENAI_MODEL = "<model-ho-tro-tool-calling>"
+$env:OPENAI_API_KEY = "<key-cau-hinh-cuc-bo>"
+python starter/run_agent.py --split dev --method dense --output starter/results/day7/agent-dense-dev
+```
+
+`OPENAI_BASE_URL` có thể trỏ tới endpoint tương thích khác. Để đánh giá test, chỉ chạy sau khi chốt cấu hình dev và dùng output folder khác. Runner không tự chấm câu trả lời/citation; cần đọc trace, đối chiếu tài liệu và điền `reviews.json` trước khi chạy `agent_metrics.py`. Nếu thiếu model hoặc endpoint, không có kết quả agent thật; không thay bằng mock.
+
 ## Lưu ý
 
 TF-IDF dùng cách tách từ đơn giản. `baseline.py` dùng mặc định context budget 800 ký tự, gồm cả nguồn; chunk không vừa bị bỏ. Bạn có thể chọn cách khác. File kết quả cùng tên sẽ bị ghi đè. `starter/data/` và `starter/results/` không được Git theo dõi mặc định; nếu được phép chia sẻ, dùng `git add -f <đường-dẫn>`, hoặc ghi cách tái tạo. Không nộp dữ liệu mật và secret.

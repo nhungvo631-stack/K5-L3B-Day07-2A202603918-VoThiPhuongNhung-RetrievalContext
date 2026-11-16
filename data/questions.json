@@ -1,0 +1,205 @@
+[
+  {
+    "id": "q01",
+    "split": "dev",
+    "type": "direct",
+    "question": "Which sport is Simone Biles known for?",
+    "expected_answer": "Gymnastics.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 7,
+    "evidence_quote": "one of the greatest gymnasts in the sport’s history"
+  },
+  {
+    "id": "q02",
+    "split": "dev",
+    "type": "direct",
+    "question": "Which group did Graham Nash co-found with his school friend Allan Clarke?",
+    "expected_answer": "The Hollies.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 9,
+    "evidence_quote": "Graham Nash co- founded The Hollies with his school friend, Allan Clarke"
+  },
+  {
+    "id": "q03",
+    "split": "dev",
+    "type": "metadata_filter",
+    "question": "In story 3, how many pets did Captain Dusty Mascaro save during the Hillsborough County flood?",
+    "expected_answer": "More than 100 pets.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 11,
+    "evidence_quote": "saved more than 100 pets in Hillsborough County, Florida",
+    "filter": {"story_id": 3}
+  },
+  {
+    "id": "q04",
+    "split": "dev",
+    "type": "direct",
+    "question": "What group of organisms is Anna Devolld passionate about helping?",
+    "expected_answer": "Pollinators.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 13,
+    "evidence_quote": "Anna is passionate about pollinators"
+  },
+  {
+    "id": "q05",
+    "split": "dev",
+    "type": "direct",
+    "question": "What caused Amy Purdy to lose her legs at age 19?",
+    "expected_answer": "Bacterial meningitis.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 15,
+    "evidence_quote": "Amy Purdy lost her legs to bacterial meningitis at the age of 19"
+  },
+  {
+    "id": "q06",
+    "split": "dev",
+    "type": "paraphrase",
+    "question": "What subject does Arthur Brooks teach at Harvard?",
+    "expected_answer": "Happiness.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 17,
+    "evidence_quote": "His class on happiness has the longest waiting list in Harvard’s catalog"
+  },
+  {
+    "id": "q07",
+    "split": "dev",
+    "type": "direct",
+    "question": "What did the trucker community do to help save a man's life?",
+    "expected_answer": "They carried out an impromptu maneuver.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 19,
+    "evidence_quote": "pulled off an impromptu maneuver that saved a man’s life"
+  },
+  {
+    "id": "q08",
+    "split": "dev",
+    "type": "direct",
+    "question": "After being asked to leave a restaurant because of his facial disfigurement, what did Oliver Bromley ask people to seek?",
+    "expected_answer": "Understanding.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 21,
+    "evidence_quote": "He only asks that we all seek understanding"
+  },
+  {
+    "id": "q09",
+    "split": "dev",
+    "type": "paraphrase",
+    "question": "What community project does Austin Picinich use to help Seattle's salmon?",
+    "expected_answer": "He paints community murals.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 23,
+    "evidence_quote": "saving the salmon of Seattle by painting community murals"
+  },
+  {
+    "id": "q10",
+    "split": "dev",
+    "type": "direct",
+    "question": "In which country did Ta’u Pupu’a grow up?",
+    "expected_answer": "Tonga.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 25,
+    "evidence_quote": "Ta’u Pupu’a grew up in Tonga"
+  },
+  {
+    "id": "q11",
+    "split": "dev",
+    "type": "direct",
+    "question": "What about Karissa Trinchera's birth increased the odds that she would develop more slowly than typical children?",
+    "expected_answer": "She was born prematurely.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 27,
+    "evidence_quote": "Karissa Trinchera was born prematurely"
+  },
+  {
+    "id": "q12",
+    "split": "dev",
+    "type": "metadata_filter",
+    "question": "In story 12, where did Preston Pollard move after high school to pursue professional skateboarding?",
+    "expected_answer": "Los Angeles.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 29,
+    "evidence_quote": "He moved to Los Angeles after high school and became a professional skateboarder",
+    "filter": {"story_id": 12}
+  },
+  {
+    "id": "q13",
+    "split": "dev",
+    "type": "paraphrase",
+    "question": "According to the Tolstoy quote in the story, what does an intelligent person discover in others?",
+    "expected_answer": "Kindness.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 31,
+    "evidence_quote": "the more he discovers kindness in others"
+  },
+  {
+    "id": "q14",
+    "split": "dev",
+    "type": "direct",
+    "question": "In what year was James Croll born?",
+    "expected_answer": "1821.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 33,
+    "evidence_quote": "James Croll was born into abject poverty in 1821"
+  },
+  {
+    "id": "q15",
+    "split": "dev",
+    "type": "direct",
+    "question": "What endurance feat did Lawrence complete?",
+    "expected_answer": "50 iron-distance triathlons in 50 days in 50 states.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 35,
+    "evidence_quote": "50 iron-distance triathlons in 50 days in 50 states"
+  },
+  {
+    "id": "q16",
+    "split": "test",
+    "type": "direct",
+    "question": "When his family could afford either shoes or school fees, what did Mustapha choose?",
+    "expected_answer": "School fees; he went barefoot.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 37,
+    "evidence_quote": "Mustapha chose school, and every day he walked two miles to class, barefoot"
+  },
+  {
+    "id": "q17",
+    "split": "test",
+    "type": "direct",
+    "question": "During which major conflict did Major League Baseball face a possible shutdown?",
+    "expected_answer": "World War II.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 39,
+    "evidence_quote": "Major League Baseball faced a shutdown during World War II"
+  },
+  {
+    "id": "q18",
+    "split": "test",
+    "type": "metadata_filter",
+    "question": "In story 18, how did Dr. Taryn Marie respond to her failing grades as a child?",
+    "expected_answer": "She used them as motivation to do better.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 41,
+    "evidence_quote": "she allowed them to motivate her to do better",
+    "filter": {"story_id": 18}
+  },
+  {
+    "id": "q19",
+    "split": "test",
+    "type": "direct",
+    "question": "What activity did JuJu love?",
+    "expected_answer": "Dancing.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 43,
+    "evidence_quote": "JuJu loved to dance"
+  },
+  {
+    "id": "q20",
+    "split": "test",
+    "type": "direct",
+    "question": "What happened to Julie and Ron Lynam's dream home, prompting them to rebuild?",
+    "expected_answer": "It was lost in a forest fire.",
+    "gold_source_id": "fbl-passiton-stories-volume-2",
+    "gold_page": 45,
+    "evidence_quote": "Julie and Ron Lynam lost their dream home in a forest fire"
+  }
+]

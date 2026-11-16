@@ -1,0 +1,5 @@
+# Install into a Python 3.11+ environment with the Day 6 embedding stack available.
+chromadb==1.5.9
+sentence-transformers==3.4.1
+transformers==4.44.2
+tokenizers==0.19.1

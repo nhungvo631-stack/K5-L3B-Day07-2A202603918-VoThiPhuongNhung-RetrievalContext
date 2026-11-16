@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Day 07 · Retrieval Agent</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17231d;
+      --muted: #64736a;
+      --line: #dce5df;
+      --paper: #f5f8f5;
+      --panel: #fff;
+      --green: #18764c;
+      --green-dark: #105b39;
+      --mint: #e8f4ec;
+      --amber: #fff4d8;
+      --red: #a53d33;
+      font-family: Inter, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    header {
+      background: #102b20;
+      color: #fff;
+      padding: 26px max(24px, calc((100vw - 1060px) / 2));
+    }
+    header h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); }
+    header p { margin: 8px 0 0; color: #c4d9cd; }
+    main { max-width: 1060px; margin: 24px auto 60px; padding: 0 20px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 5px 18px #183d2810;
+      margin-bottom: 18px;
+    }
+    .status-row, .form-row, .result-head, .source-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .badge { border-radius: 99px; padding: 7px 11px; font-size: 13px; font-weight: 650; }
+    .badge.ok { color: var(--green-dark); background: var(--mint); }
+    .badge.warn { color: #805a0c; background: var(--amber); }
+    .badge.bad { color: var(--red); background: #fce9e7; }
+    .muted, .hint { color: var(--muted); font-size: 14px; }
+    label { display: block; font-size: 14px; font-weight: 650; margin: 17px 0 7px; }
+    select, textarea {
+      width: 100%; border: 1px solid #cbd7ce; border-radius: 9px;
+      font: inherit; color: var(--ink); background: #fff; padding: 11px 12px;
+    }
+    textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+    .controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+    button {
+      border: 0; border-radius: 9px; padding: 11px 16px; font: inherit;
+      font-weight: 700; cursor: pointer;
+    }
+    button.primary { color: #fff; background: var(--green); }
+    button.primary:hover { background: var(--green-dark); }
+    button.secondary { background: var(--mint); color: var(--green-dark); }
+    button:disabled { opacity: .58; cursor: wait; }
+    .error { color: var(--red); background: #fff0ef; border-radius: 8px; padding: 12px; }
+    .answer { font-size: 18px; line-height: 1.65; white-space: pre-wrap; }
+    .cards { display: grid; gap: 10px; margin-top: 14px; }
+    .card { border: 1px solid var(--line); border-radius: 10px; padding: 13px; background: #fff; }
+    .card p { margin: 8px 0 0; line-height: 1.55; white-space: pre-wrap; }
+    .tag { color: var(--green-dark); background: var(--mint); border-radius: 5px; padding: 3px 7px; font-size: 12px; }
+    .trace { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .empty { color: var(--muted); text-align: center; padding: 26px 8px; }
+    @media (max-width: 650px) {
+      .controls { grid-template-columns: 1fr; gap: 0; }
+      .panel { padding: 17px; }
+      .status-row, .result-head { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Day 07 · Retrieval Agent</h1>
+    <p>Đặt câu hỏi, xem agent tìm bằng chứng và kiểm tra citation từ tài liệu.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="status-row">
+        <div>
+          <strong>Trạng thái</strong>
+          <div id="status-detail" class="muted">Đang kiểm tra dữ liệu...</div>
+        </div>
+        <span id="status-badge" class="badge warn">Đang tải</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="controls">
+        <div>
+          <label for="method">Phương pháp retrieval</label>
+          <select id="method">
+            <option value="bm25">BM25 · lexical (không cần vector index)</option>
+            <option value="dense">Dense · Chroma Day 07</option>
+            <option value="hybrid">Hybrid · dense + BM25 (RRF)</option>
+          </select>
+        </div>
+        <div>
+          <label for="question-split">Bộ câu hỏi</label>
+          <select id="question-split">
+            <option value="dev">Dev</option>
+            <option value="test">Test</option>
+          </select>
+        </div>
+        <div>
+          <label for="examples">Câu benchmark (chỉ nạp câu hỏi)</label>
+          <select id="examples">
+            <option value="">Tự nhập câu hỏi</option>
+          </select>
+        </div>
+      </div>
+      <label for="question">Câu hỏi của bạn</label>
+      <textarea id="question" placeholder="Ví dụ: Which sport is Simone Biles known for?"></textarea>
+      <div class="actions">
+        <button id="ask" class="primary">Hỏi agent thật</button>
+        <button id="search" class="secondary">Chỉ tìm bằng chứng</button>
+      </div>
+      <p class="hint">“Hỏi agent thật” gọi model đã cấu hình trên máy chủ. “Chỉ tìm bằng chứng” kiểm tra retrieval mà không gọi model.</p>
+    </section>
+
+    <section id="result" class="panel" aria-live="polite">
+      <div class="empty">Nhập câu hỏi hoặc chọn câu benchmark để bắt đầu.</div>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const result = $('result');
+    let examples = [];
+
+    function node(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
+    function showError(message) {
+      result.replaceChildren(node('div', 'error', message));
+    }
+
+    async function requestJson(path, options) {
+      const response = await fetch(path, options);
+      const contentType = response.headers.get('content-type') || '';
+      const body = await response.text();
+      if (!contentType.toLowerCase().includes('application/json')) {
+        if (body.trimStart().startsWith('<')) {
+          throw new Error('API trả về HTML thay vì JSON. Hãy mở giao diện qua http://127.0.0.1:8765 (không dùng Live Server hoặc Preview).');
+        }
+        throw new Error(`API không trả JSON (HTTP ${response.status}).`);
+      }
+      let data;
+      try {
+        data = JSON.parse(body);
+      } catch {
+        throw new Error('API trả JSON không hợp lệ.');
+      }
+      if (!response.ok) {
+        throw new Error(data.error || `Request thất bại (HTTP ${response.status}).`);
+      }
+      return data;
+    }
+
+    async function loadHealth() {
+      try {
+        const health = await requestJson('/api/health');
+        const ready = health.corpus_ready;
+        const modelReady = health.chat_model_ready;
+        $('status-badge').className = `badge ${ready && modelReady ? 'ok' : 'warn'}`;
+        $('status-badge').textContent = ready && modelReady ? 'Agent sẵn sàng' : 'Cần cấu hình';
+        $('status-detail').textContent =
+          `Corpus ${ready ? 'đã nạp' : 'chưa có'} · Model chat ${modelReady ? health.chat_model : 'chưa cấu hình'} · Embedding ${health.embedding_model}`;
+      } catch (error) {
+        $('status-badge').className = 'badge bad';
+        $('status-badge').textContent = 'Không kết nối được';
+        $('status-detail').textContent = error.message;
+      }
+    }
+
+    async function loadExamples(split) {
+      examples = await requestJson(`/api/questions?split=${encodeURIComponent(split)}`);
+      const select = $('examples');
+      select.replaceChildren(new Option('Tự nhập câu hỏi', ''));
+      for (const item of examples) {
+        const suffix = item.answerable ? 'có đáp án' : 'thiếu evidence';
+        select.add(new Option(`${item.id} · ${suffix}`, item.id));
+      }
+    }
+
+    $('examples').addEventListener('focus', async () => {
+      if (examples.length) return;
+      try { await loadExamples($('question-split').value); } catch (error) { showError(error.message); }
+    });
+    $('question-split').addEventListener('change', async () => {
+      examples = [];
+      try { await loadExamples($('question-split').value); } catch (error) { showError(error.message); }
+    });
+    $('examples').addEventListener('change', () => {
+      const item = examples.find((entry) => entry.id === $('examples').value);
+      if (item) $('question').value = item.question;
+    });
+
+    function renderResponse(data, mode) {
+      result.replaceChildren();
+      const header = node('div', 'result-head');
+      const label = mode === 'agent' ? `Agent · ${data.status}` : `Retrieval · ${data.method}`;
+      header.append(node('strong', '', label));
+      header.append(node('span', 'muted', `${Math.round(data.elapsed_ms)} ms`));
+      result.append(header);
+      if (mode === 'agent') {
+        result.append(node('p', 'answer', data.answer || 'Không có câu trả lời.'));
+        if (data.citations?.length) {
+          result.append(node('div', 'muted', `Citation: ${data.citations.map((id) => `[${id}]`).join(', ')}`));
+        }
+      }
+
+      const searches = (data.events || []).filter((event) => event.event === 'search');
+      const retrieved = mode === 'search'
+        ? data.results || []
+        : searches.flatMap((event) => event.results || []);
+      if (searches.length) {
+        const trace = node('div', 'trace');
+        trace.textContent = `Số lượt tìm: ${searches.length} · Query: ${searches.map((event) => event.query).join(' → ')}`;
+        result.append(trace);
+      }
+      if (retrieved.length) {
+        result.append(node('h3', '', 'Bằng chứng đã truy xuất'));
+        const cards = node('div', 'cards');
+        const seen = new Set();
+        for (const item of retrieved) {
+          if (seen.has(item.id)) continue;
+          seen.add(item.id);
+          const card = node('article', 'card');
+          const meta = node('div', 'source-row');
+          meta.append(node('span', 'tag', `[${item.id}]`));
+          meta.append(node('span', 'muted', `Trang ${item.page} · score ${Number(item.score || 0).toFixed(3)}`));
+          card.append(meta);
+          card.append(node('p', '', item.text));
+          cards.append(card);
+        }
+        result.append(cards);
+      }
+      const context = data.final_context;
+      if (context) {
+        const details = document.createElement('details');
+        details.append(node('summary', '', `Context cuối gửi model (${data.context_ids?.length || 0} chunk)`));
+        details.append(node('p', 'trace', context));
+        result.append(details);
+      }
+    }
+
+    async function submit(mode) {
+      const question = $('question').value.trim();
+      if (!question) { showError('Hãy nhập câu hỏi trước.'); return; }
+      const button = mode === 'agent' ? $('ask') : $('search');
+      button.disabled = true;
+      result.replaceChildren(node('div', 'empty', 'Đang tìm bằng chứng...'));
+      try {
+        const data = await requestJson(`/api/${mode === 'agent' ? 'ask' : 'search'}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({question, method: $('method').value}),
+        });
+        renderResponse(data, mode);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        button.disabled = false;
+        loadHealth();
+      }
+    }
+
+    $('ask').addEventListener('click', () => submit('agent'));
+    $('search').addEventListener('click', () => submit('search'));
+    loadHealth();
+    loadExamples('dev').catch((error) => showError(error.message));
+  </script>
+</body>
+</html>

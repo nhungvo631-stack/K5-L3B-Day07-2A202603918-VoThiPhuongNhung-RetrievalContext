@@ -1,0 +1,38 @@
+[
+  {
+    "id": "q21",
+    "split": "dev",
+    "type": "unanswerable_near_topic",
+    "question": "What exact amount of prize money did Simone Biles receive for each gold medal at the 2024 Olympics?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The Simone Biles story discusses her gymnastics career and medals but gives no per-medal prize-money amount."
+  },
+  {
+    "id": "q22",
+    "split": "dev",
+    "type": "unanswerable_near_topic",
+    "question": "How many individual bees were in the first pollinator habitat Anna Devolld created?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The Anna Devolld story describes Pollinator Packs and pollinator habitats but gives no count of bees in a habitat."
+  },
+  {
+    "id": "q23",
+    "split": "test",
+    "type": "unanswerable_near_topic",
+    "question": "On what exact calendar date did the forest fire reach Julie and Ron Lynam's home?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The story describes the fire and Julie's recollection, but does not state a calendar date."
+  },
+  {
+    "id": "q24",
+    "split": "test",
+    "type": "unanswerable_near_topic",
+    "question": "What exact dollar amount did Mustapha receive as a scholarship for his education?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "The Mustapha story describes his education and degrees but does not give a scholarship amount."
+  }
+]

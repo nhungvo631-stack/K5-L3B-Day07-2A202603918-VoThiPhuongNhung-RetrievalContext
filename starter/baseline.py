@@ -14,6 +14,17 @@ def tokenize(text):
     return re.findall(r'\w+', unicodedata.normalize('NFC', text).casefold())
 
 
+def normalized_text(text):
+    return ' '.join(unicodedata.normalize('NFC', text).split())
+
+
+def matches_filter(chunk, filters):
+    if not filters:
+        return True
+    metadata = chunk.get('metadata', {})
+    return all(metadata.get(key) == value for key, value in filters.items())
+
+
 def validate(chunks, questions):
     if not isinstance(chunks, list) or not chunks:
         raise ValueError('chunks phải là JSON array không rỗng')
@@ -48,7 +59,9 @@ def validate(chunks, questions):
 
 
 def hit(chunk, gold):
-    return any(chunk['source_id'] == g['source_id'] and chunk['page'] == g['page'] and g['evidence'] in chunk['text'] for g in gold)
+    text = normalized_text(chunk['text'])
+    return any(chunk['source_id'] == g['source_id'] and chunk['page'] == g['page']
+               and normalized_text(g['evidence']) in text for g in gold)
 
 
 class TfidfIndex:
@@ -64,10 +77,12 @@ class TfidfIndex:
         norm = math.sqrt(sum(value * value for value in vector.values())) or 1
         return {term: value / norm for term, value in vector.items()}
 
-    def search(self, question, top_k=3):
+    def search(self, question, top_k=3, filters=None):
         query = self._vector(Counter(tokenize(question)))
         results = []
         for chunk, vector in zip(self.chunks, self.vectors):
+            if not matches_filter(chunk, filters):
+                continue
             score = sum(value * vector.get(term, 0) for term, value in query.items())
             if score > 0:
                 results.append({**chunk, 'score': score, 'strategy': 'tfidf'})

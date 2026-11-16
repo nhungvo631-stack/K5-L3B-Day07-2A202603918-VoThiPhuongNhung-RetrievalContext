@@ -43,11 +43,30 @@ def run_agent(question: str, controller: Controller, retriever: Retriever, *,
     chunks: dict[str, dict[str, Any]] = {}
     candidates: list[dict[str, Any]] = []
     events: list[dict[str, Any]] = []
+    model_calls: list[dict[str, Any]] = []
+    final_context = ''
+    context_ids: list[str] = []
+
+    def finish(status: str, answer: str, citations: list[str], event: dict[str, Any] | None = None):
+        final_events = events + ([event] if event else [])
+        return {
+            'status': status,
+            'answer': answer,
+            'citations': citations,
+            'events': final_events,
+            'model_calls': model_calls,
+            'final_context': final_context,
+            'context_ids': context_ids,
+        }
+
     for _ in range(max_searches + 1):
         action = controller.decide(question, history)
+        call = getattr(controller, 'last_call', None)
+        if isinstance(call, dict):
+            model_calls.append(dict(call))
         if action.get('action') == 'search':
             if sum(e['event'] == 'search' for e in events) >= max_searches:
-                return {'status': 'abstain', 'answer': 'Không đủ bằng chứng để trả lời.', 'citations': [], 'events': events + [{'event': 'search_limit'}]}
+                return finish('abstain', 'Không đủ bằng chứng để trả lời.', [], {'event': 'search_limit'})
             query = action.get('query')
             if not isinstance(query, str) or not query.strip():
                 raise ValueError('search query phải là chuỗi không rỗng')
@@ -57,6 +76,7 @@ def run_agent(question: str, controller: Controller, retriever: Retriever, *,
             candidates.extend(results)
             context, ids = pack_context(candidates, budget=budget)
             chunks = {c['id']: c for c in candidates if c['id'] in ids}
+            final_context, context_ids = context, ids
             events.append({'event': 'search', 'query': query, 'filter': filters, 'results': results,
                            'context': context, 'context_ids': ids})
             # Send only the latest cumulative context; avoid multiplying the budget.
@@ -68,8 +88,8 @@ def run_agent(question: str, controller: Controller, retriever: Retriever, *,
                 raise ValueError('answer/citations không hợp lệ')
             valid = bool(answer.strip() and citations and all(i in chunks and f'[{i}]' in answer for i in citations))
             if valid:
-                return {'status': 'answered', 'answer': answer, 'citations': citations, 'events': events + [{'event': 'answer'}]}
-            return {'status': 'abstain', 'answer': 'Không đủ bằng chứng để trả lời.', 'citations': [], 'events': events + [{'event': 'invalid_or_missing_citations'}]}
+                return finish('answered', answer, citations, {'event': 'answer'})
+            return finish('abstain', 'Không đủ bằng chứng để trả lời.', [], {'event': 'invalid_or_missing_citations'})
         else:
             raise ValueError('action phải là search hoặc answer')
-    return {'status': 'abstain', 'answer': 'Không đủ bằng chứng để trả lời.', 'citations': [], 'events': events}
+    return finish('abstain', 'Không đủ bằng chứng để trả lời.', [])
